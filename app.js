@@ -5,9 +5,10 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var cors = require('cors');
+var config = require('./config');
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017');
+mongoose.connect(config.mongo_url);
 
 var bears = require('./routes/bears');
 var entries = require('./routes/entries');
