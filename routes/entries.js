@@ -51,11 +51,16 @@ router.put('/:entry_id', function(req, res) {
     if (err)
       res.send(err);
 
-    entry.title = req.body.title;
-    entry.type = req.body.type;
-    entry.tags = req.body.tags;
-    entry.body = req.body.body;
-    entry.url = req.body.url;
+    // debug
+    // console.log(JSON.stringify(req.body));
+    
+    var newEntry = req.body.entry;
+
+    entry.title = newEntry.title;
+    entry.type = newEntry.type;
+    entry.tags = newEntry.tags;
+    entry.body = newEntry.body;
+    entry.url = newEntry.url;
     entry.modified = (new Date()).toISOString();
 
     entry.save(function(err) {
