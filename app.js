@@ -8,7 +8,7 @@ var cors = require('cors');
 var config = require('./config');
 
 var mongoose = require('mongoose');
-mongoose.connect(config.mongo_url);
+mongoose.connect('mongodb://' + config.mongo_host + ':' + config.mongo_port);
 
 var bears = require('./routes/bears');
 var entries = require('./routes/entries');
