@@ -4,12 +4,13 @@ var Entry = require('../models/entry');
 
 router.post('/', function(req, res) {
   var entry = new Entry();
+  var newEntry = req.body.entry;
 
-  entry.title = req.body.title;
-  entry.type = req.body.type;
-  entry.tags = req.body.tags;
-  entry.body = req.body.body;
-  entry.url = req.body.url;
+  entry.title = newEntry.title;
+  entry.type = newEntry.type;
+  entry.tags = newEntry.tags;
+  entry.body = newEntry.body;
+  entry.url = newEntry.url;
   entry.created = (new Date()).toISOString();
   entry.modified = (new Date()).toISOString();
 
@@ -17,7 +18,7 @@ router.post('/', function(req, res) {
     if (err)
       res.send(err);
     
-    res.json({ message: "Entry created.\n" });
+    res.send('OK');
 
   });
 });
@@ -41,7 +42,11 @@ router.get('/:entry_id', function(req, res) {
     if (err)
       res.send(err);
 
-    res.json(entry);
+    var result = {
+      entry: entry
+    };
+
+    res.json(result);
 
   });
 });
@@ -67,7 +72,7 @@ router.put('/:entry_id', function(req, res) {
       if (err)
         res.send(err);
 
-      res.json({ message: 'Entry updated.' });
+      res.send('OK');
 
     });
   });
@@ -81,7 +86,7 @@ router.delete('/:entry_id', function(req, res) {
     if (err)
       res.send(err);
 
-    res.json({ message: 'He\'s deleted, Jim.' });
+    res.send('He\'s deleted, Jim.');
 
   });
 });
