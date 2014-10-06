@@ -18,8 +18,10 @@ router.post('/', function(req, res) {
     if (err)
       res.send(err);
     
-    res.send('OK');
+    res.json({
+      entry: entry
 
+    });
   });
 });
 
@@ -28,12 +30,10 @@ router.get('/', function(req, res) {
     if (err)
       res.send(err);
 
-    var results = {
+    res.json({
       entries: entries
-    };
-    
-    res.json(results);
 
+    });
   });
 });
 
@@ -56,9 +56,6 @@ router.put('/:entry_id', function(req, res) {
     if (err)
       res.send(err);
 
-    // debug
-    // console.log(JSON.stringify(req.body));
-    
     var newEntry = req.body.entry;
 
     entry.title = newEntry.title;
@@ -72,8 +69,10 @@ router.put('/:entry_id', function(req, res) {
       if (err)
         res.send(err);
 
-      res.send('OK');
+      res.json({
+        entry: entry
 
+      });
     });
   });
 });
