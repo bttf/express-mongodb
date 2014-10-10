@@ -51,29 +51,43 @@ router.get('/:entry_id', function(req, res) {
   });
 });
 
-router.put('/:entry_id', function(req, res) {
+router.put('/:entry_id', function(req, res, next) {
   Entry.findById(req.params.entry_id, function(err, entry) {
     if (err)
       res.send(err);
 
-    var newEntry = req.body.entry;
+    if (req.body.entry) {
+      var newEntry = req.body.entry;
 
-    entry.title = newEntry.title;
-    entry.type = newEntry.type;
-    entry.tags = newEntry.tags;
-    entry.body = newEntry.body;
-    entry.url = newEntry.url;
-    entry.modified = (new Date()).toISOString();
+      if (newEntry.title)
+        entry.title = newEntry.title;
+      if (newEntry.type)
+        entry.type = newEntry.type;
+      if (newEntry.tags)
+        entry.tags = newEntry.tags;
+      if (newEntry.body)
+        entry.body = newEntry.body;
+      if (newEntry.url)
+        entry.url = newEntry.url;
 
-    entry.save(function(err) {
-      if (err)
-        res.send(err);
+      entry.modified = (new Date()).toISOString();
 
-      res.json({
-        entry: entry
+    }
 
+
+    if (entry) 
+      entry.save(function(err) {
+        if (err)
+          res.send(err);
+
+        res.json({
+          entry: entry
+
+        });
       });
-    });
+    else
+      next();
+
   });
 });
 
