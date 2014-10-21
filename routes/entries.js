@@ -42,12 +42,10 @@ router.get('/:entry_id', function(req, res) {
     if (err)
       res.send(err);
 
-    var result = {
+    res.json({
       entry: entry
-    };
 
-    res.json(result);
-
+    });
   });
 });
 

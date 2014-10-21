@@ -12,6 +12,8 @@ mongoose.connect('mongodb://' + config.mongo_host + ':' + config.mongo_port);
 
 var bears = require('./routes/bears');
 var entries = require('./routes/entries');
+var auth = require('./routes/auth');
+var users = require('./routes/users');
 
 var app = express();
 
@@ -33,6 +35,8 @@ app.options('*', cors());
 
 app.use('/bears', bears);
 app.use('/entries', entries);
+app.use('/auth', auth);
+app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
