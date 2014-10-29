@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var uuid = require('node-uuid');
-var bcrypt = require('bcrypt');
 var Session = require('../models/session');
 var User = require('../models/user');
 
@@ -26,38 +25,32 @@ router.post('/', function(req, res, next) {
       username: username
 
     }, function(err, user) {
-      bcrypt.compare(password, user.password, function(err, valid) {
+      if (err) res.send(err);
+
+      user.validPassword(password, function(err, valid) {
         if (valid) {
-          // remove existing sessions
           Session.remove({
             username: username,
             valid: true
-
           }, function(err) {
-            if (err) 
-              res.send(err);
-
+            if (err) res.send(err);
           });
 
           var session = new Session();
-
           session.token = uuid.v1();
           session.valid = true;
           session.username = username;
-
           session.save(function(err) {
             if (err)
               res.send(err);
-
             res.json({
               session: session
-
             });
           });
         }
-        else 
+        else {
           next();
-
+        }
       });
     });
   }
