@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var bcrypt = require('bcrypt');
+var uuid = require('node-uuid');
 var User = require('../models/user');
 
 router.get('/', function(req, res, next) {
@@ -23,6 +24,7 @@ router.post('/', function(req, res, next) {
       bcrypt.hash(req.body.password, salt, function(err, hash) {
         user.username = req.body.username;
         user.password = hash;
+        user.token = uuid.v4();
 
         user.save(function(err) {
           if (err)
@@ -80,7 +82,7 @@ router.put('/:user_id', function(req, res, next) {
 router.delete('/:user_id', function(req, res, next) {
   User.remove({
     _id: req.params.user_id
-    
+
   }, function(err, user) {
     if (err)
       res.send(err);

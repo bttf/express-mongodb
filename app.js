@@ -6,13 +6,16 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var cors = require('cors');
 var config = require('./config');
+var session = require('express-session');
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+var BearerStrategy = require('passport-http-bearer').Strategy;
+var User = require('./models/user');
 
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://' + config.mongo_host + ':' + config.mongo_port);
 
-var bears = require('./routes/bears');
 var entries = require('./routes/entries');
-var auth = require('./routes/auth');
 var users = require('./routes/users');
 
 var app = express();
@@ -27,29 +30,98 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(passport.initialize());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// passport
+//
+passport.use(new BearerStrategy(
+  function(token, done) {
+    console.log('debug: BearerStrategy');
+    User.validateToken(token, function(err, user) {
+      if (err) {
+        return done(err);
+      }
+      if (!user) {
+        return done(null, false);
+      }
+      done(null, user);
+    });
+  }
+));
+
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+  console.log('debug: localStrategy');
+  User.findOne({
+    username: username
+
+  }, function(err, user) {
+    if (err) {
+      console.log('debug: localStrategy: err');
+      return done(err);
+    }
+
+    if (!user) {
+      console.log('debug: localStrategy: !user');
+      return done(null, false);
+    }
+
+    user.validPassword(password, function(err, valid) {
+      if (valid) {
+        console.log('debug: localStrategy: valid');
+        user.resetToken();
+        user.save();
+        done(null, user);
+      }
+      else {
+        console.log('debug: localStrategy: invalid password');
+        return done(null, false);
+      }
+    });
+  });
+}));
 
 // enable CORS for development
 app.use(cors());
 app.options('*', cors());
 
-app.use('/bears', bears);
+// routes
+app.use('/auth', passport.authenticate('local', { session: false }), function(req, res, next) {
+  res.json({
+    token: req.user.token
+  });
+});
+
+app.use(function(req, res, next) {
+  if (req.headers['token']) {
+    req.query['access_token'] = req.headers['token'];
+  }
+  next();
+});
+//}, passport.authenticate('bearer', { session: false }));
+
+app.use('/logout', function(req, res) {
+  req.logout();
+  res.status(200).send('OK');
+});
+
 app.use('/entries', entries);
-app.use('/auth', auth);
 app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    var err = new Error('Not Found\n');
-    err.status = 404;
-    next(err);
+  var err = new Error('Not Found\n');
+  err.status = 404;
+  next(err);
 });
 
 // error handlers
 app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.send('error, sorry.\n');
+  console.log('debug: error handler, 404, \'error, sorry\'');
+  res.status(err.status || 500);
+  res.send('error, sorry.\n');
 });
 
-
 module.exports = app;
+
