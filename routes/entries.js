@@ -3,8 +3,9 @@ var router = express.Router();
 var Entry = require('../models/entry');
 var User = require('../models/user');
 var passport = require('passport');
+var auth = passport.authenticate.bind(passport, 'bearer', { session: false });
 
-router.post('/', function(req, res) {
+router.post('/', auth(), function(req, res) {
   var entry = new Entry();
   var newEntry = req.body.entry;
 
@@ -27,7 +28,7 @@ router.post('/', function(req, res) {
   });
 });
 
-router.get('/', passport.authenticate('bearer', { session: false }), function(req, res, next) {
+router.get('/', function(req, res, next) {
   console.log('debug get request for entires');
   Entry.find(function(err, entries) {
     console.log('debug: entries, get: Entry.find');
@@ -53,66 +54,56 @@ router.get('/:entry_id', function(req, res) {
   });
 });
 
-router.put('/:entry_id', function(req, res, next) {
-  if (!req.user) {
-    next();
-  }
-  else {
-    Entry.findById(req.params.entry_id, function(err, entry) {
-      if (err)
-        res.send(err);
+router.put('/:entry_id', auth(), function(req, res, next) {
+  Entry.findById(req.params.entry_id, function(err, entry) {
+    if (err)
+      res.send(err);
 
-      if (req.body.entry) {
-        var newEntry = req.body.entry;
+    if (req.body.entry) {
+      var newEntry = req.body.entry;
 
-        if (newEntry.title)
-          entry.title = newEntry.title;
-        if (newEntry.type)
-          entry.type = newEntry.type;
-        if (newEntry.tags)
-          entry.tags = newEntry.tags;
-        if (newEntry.body)
-          entry.body = newEntry.body;
-        if (newEntry.url)
-          entry.url = newEntry.url;
+      if (newEntry.title)
+        entry.title = newEntry.title;
+      if (newEntry.type)
+        entry.type = newEntry.type;
+      if (newEntry.tags)
+        entry.tags = newEntry.tags;
+      if (newEntry.body)
+        entry.body = newEntry.body;
+      if (newEntry.url)
+        entry.url = newEntry.url;
 
-        entry.modified = (new Date()).toISOString();
+      entry.modified = (new Date()).toISOString();
 
-      }
+    }
 
 
-      if (entry) 
-        entry.save(function(err) {
-          if (err)
-            res.send(err);
+    if (entry) 
+      entry.save(function(err) {
+        if (err)
+          res.send(err);
 
-          res.json({
-            entry: entry
+        res.json({
+          entry: entry
 
-          });
         });
-        else
-          next();
-    });
-  }
+      });
+      else
+        next();
+  });
 });
 
-router.delete('/:entry_id', function(req, res) {
-  if (!req.user) {
-    next();
-  }
-  else {
-    Entry.remove({
-      _id: req.params.entry_id
+router.delete('/:entry_id', auth(), function(req, res) {
+  Entry.remove({
+    _id: req.params.entry_id
 
-    }, function(err, entry) {
-      if (err)
-        res.send(err);
+  }, function(err, entry) {
+    if (err)
+      res.send(err);
 
-      res.send('He\'s deleted, Jim.');
+    res.send('He\'s deleted, Jim.');
 
-    });
-  }
+  });
 });
 
 module.exports = router;

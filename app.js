@@ -99,15 +99,15 @@ app.use(function(req, res, next) {
   }
   next();
 });
-//}, passport.authenticate('bearer', { session: false }));
 
-app.use('/logout', function(req, res) {
+app.use('/logout', passport.authenticate('bearer', { session: false }), function(req, res) {
+  req.user.resetToken();
   req.logout();
   res.status(200).send('OK');
 });
 
 app.use('/entries', entries);
-app.use('/users', users);
+app.use('/users', passport.authenticate('bearer', { session: false }), users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -3,8 +3,10 @@ var router = express.Router();
 var bcrypt = require('bcrypt');
 var uuid = require('node-uuid');
 var User = require('../models/user');
+var passport = require('passport');
+var auth = passport.authenticate.bind(passport, 'bearer', { session: false });
 
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
   User.find(function(err, users) {
     if (err)
       res.send(err);
@@ -16,7 +18,7 @@ router.get('/', function(req, res, next) {
   });
 });
 
-router.post('/', function(req, res, next) {
+router.post('/', function(req, res) {
   var user = new User();
 
   if (req.body.username && req.body.password) {
@@ -44,6 +46,9 @@ router.get('/:user_id', function(req, res, next) {
   User.findById(req.params.user_id, function(err, user) {
     if (err)
       res.send(err);
+
+    if (!user)
+      next();
 
     res.json({
       user: user
@@ -76,6 +81,9 @@ router.put('/:user_id', function(req, res, next) {
         });
       });
     }
+    else {
+      next();
+    }
   });
 });
 
@@ -84,8 +92,13 @@ router.delete('/:user_id', function(req, res, next) {
     _id: req.params.user_id
 
   }, function(err, user) {
-    if (err)
+    if (err) {
       res.send(err);
+    }
+
+    if (!user) {
+      next();
+    }
 
     res.send('He\'s deleted, Jim.');
 

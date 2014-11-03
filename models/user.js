@@ -16,6 +16,8 @@ UserSchema.method('validPassword', function(plaintext, cb) {
 
 UserSchema.method('resetToken', function() {
   this.token = uuid.v4();
+  console.log('debug: user token reset: %s', this.token);
+  this.save();
 });
 
 UserSchema.statics.validateToken = function(token, cb) {
