@@ -97,7 +97,14 @@ app.use(function(req, res, next) {
   if (req.headers['token']) {
     req.query['access_token'] = req.headers['token'];
   }
+  else if (req.body['token']) {
+    req.query['access_token'] = req.body['token'];
+  }
   next();
+});
+
+app.use('/validate', passport.authenticate('bearer', { session: false }), function(req, res) {
+  res.status(200).send('OK');
 });
 
 app.use('/logout', passport.authenticate('bearer', { session: false }), function(req, res) {
