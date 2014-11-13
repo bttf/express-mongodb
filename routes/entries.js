@@ -98,10 +98,11 @@ router.delete('/:entry_id', auth(), function(req, res) {
     _id: req.params.entry_id
 
   }, function(err, entry) {
-    if (err)
+    if (err) {
       res.send(err);
+    }
 
-    res.send('He\'s deleted, Jim.');
+    res.json({});
 
   });
 });
