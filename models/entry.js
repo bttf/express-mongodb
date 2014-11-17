@@ -8,7 +8,8 @@ var EntrySchema = new Schema({
   body: String,
   url: String,
   created: Date,
-  modified: Date
+  modified: Date,
+  isDraft: Boolean
 
 });
 

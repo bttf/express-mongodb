@@ -16,6 +16,7 @@ router.post('/', auth(), function(req, res) {
   entry.url = newEntry.url;
   entry.created = (new Date()).toISOString();
   entry.modified = (new Date()).toISOString();
+  entry.isDraft = newEntry.isDraft;
 
   entry.save(function(err) {
     if (err)
@@ -74,6 +75,7 @@ router.put('/:entry_id', auth(), function(req, res, next) {
         entry.url = newEntry.url;
 
       entry.modified = (new Date()).toISOString();
+      entry.isDraft = newEntry.isDraft || false;
 
     }
 
