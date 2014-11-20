@@ -13,7 +13,7 @@ var BearerStrategy = require('passport-http-bearer').Strategy;
 var User = require('./models/user');
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://' + config.mongo_host + ':' + config.mongo_port);
+mongoose.connect('mongodb://' + config.mongo_host + ':' + config.mongo_port + '/chewbonga');
 
 var entries = require('./routes/entries');
 var users = require('./routes/users');
