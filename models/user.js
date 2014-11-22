@@ -25,5 +25,21 @@ UserSchema.statics.validateToken = function(token, cb) {
   this.findOne({ token: token }, cb);
 };
 
+UserSchema.statics.createDefaultAdminUser = function() {
+  var _this = this;
+  this.findOne({}, function(err, user) {
+    if (!user) {
+      var adminUser = new _this;
+      adminUser.username = "admin";
+      bcrypt.genSalt(10, function(err, salt) {
+        return bcrypt.hash("password", salt, function(err, hash) {
+          adminUser.password = hash;
+          adminUser.save();
+        });
+      });
+    }
+  });
+};
+
 module.exports = mongoose.model('User', UserSchema);
 

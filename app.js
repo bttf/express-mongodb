@@ -15,6 +15,8 @@ var User = require('./models/user');
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://' + config.mongo_host + ':' + config.mongo_port + '/chewbonga');
 
+User.createDefaultAdminUser();
+
 var entries = require('./routes/entries');
 var users = require('./routes/users');
 

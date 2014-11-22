@@ -20,15 +20,19 @@ router.get('/', function(req, res) {
 
 router.post('/', function(req, res) {
   var user = new User();
+  var username = req.body.user.username;
+  var password = req.body.user.password;
 
-  if (req.body.username && req.body.password) {
+  if (username && password) {
     bcrypt.genSalt(10, function(err, salt) {
-      bcrypt.hash(req.body.password, salt, function(err, hash) {
-        user.username = req.body.username;
+      bcrypt.hash(password, salt, function(err, hash) {
+        user.username = username;
         user.password = hash;
         user.token = uuid.v4();
 
         user.save(function(err) {
+          console.log('username', user.username);
+          console.log('password', user.password);
           if (err)
             res.send(err);
 
@@ -39,6 +43,9 @@ router.post('/', function(req, res) {
         });
       });
     });
+  }
+  else {
+    next();
   }
 });
 
@@ -100,8 +107,7 @@ router.delete('/:user_id', function(req, res, next) {
       next();
     }
 
-    res.send('He\'s deleted, Jim.');
-
+    res.json({});
   });
 });
 
