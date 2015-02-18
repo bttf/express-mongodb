@@ -24,33 +24,56 @@ router.post('/', auth(), function(req, res) {
 
     res.json({
       entry: entry
+    });
+  });
+});
 
+router.get('/length', function(req, res, next) {
+  Entry.find(function(err, entries) {
+    entries = filterDrafts(req.param('drafts'), entries);
+
+    res.json({
+      length: entries.length
     });
   });
 });
 
 router.get('/', function(req, res, next) {
-  console.log('debug get request for entires');
   Entry.find(function(err, entries) {
-    console.log('debug: entries, get: Entry.find');
-    if (err)
+    if (err){
       res.send(err);
+    }
+
+    entries = filterDrafts(req.param('drafts'), entries);
+
+    var sortBy = req.param('sortBy') || 'modified';
+    entries = entries.sort(function(a, b) {
+      var d1 = Date.parse(a[sortBy]);
+      var d2 = Date.parse(b[sortBy]);
+      return d2 - d1;
+    });
+
+    if (req.param('offset')) {
+      entries = entries.slice(req.param('offset'));
+    }
+
+    if (req.param('limit')) {
+      entries = entries.slice(0, req.param('limit'));
+    }
 
     res.json({
       entries: entries
-
     });
   });
 });
 
 router.get('/:entry_id', function(req, res) {
   Entry.findById(req.params.entry_id, function(err, entry) {
-    if (err)
+    if (err) {
       res.send(err);
-
+    }
     res.json({
       entry: entry
-
     });
   });
 });
@@ -76,38 +99,40 @@ router.put('/:entry_id', auth(), function(req, res, next) {
 
       entry.modified = (new Date()).toISOString();
       entry.isDraft = newEntry.isDraft || false;
-
     }
 
 
-    if (entry) 
+    if (entry) {
       entry.save(function(err) {
-        if (err)
+        if (err) {
           res.send(err);
-
+        }
         res.json({
           entry: entry
-
         });
       });
-      else
-        next();
+    } else {
+      next();
+    }
   });
 });
 
 router.delete('/:entry_id', auth(), function(req, res) {
   Entry.remove({
     _id: req.params.entry_id
-
   }, function(err, entry) {
     if (err) {
       res.send(err);
     }
-
     res.json({});
-
   });
 });
 
 module.exports = router;
 
+function filterDrafts(reqParam, entries) {
+  var getDrafts = reqParam === 'true' ? true : false;
+  return entries.filter(function(entry) {
+    return entry.isDraft === !!getDrafts;
+  });
+}
